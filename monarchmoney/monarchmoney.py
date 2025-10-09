@@ -2855,10 +2855,22 @@ class MonarchMoney(object):
             data["supports_mfa"] = True
             data["totp"] = mfa_secret_key
 
+        print(
+            f"DEBUG: Making login request to URL: {MonarchMoneyEndpoints.getLoginEndpoint()}"
+        )
+        print(f"DEBUG: Login payload headers: {self._headers}")
+        print(f"DEBUG: Login payload json: {data}")
+
         async with ClientSession(headers=self._headers) as session:
             async with session.post(
                 MonarchMoneyEndpoints.getLoginEndpoint(), json=data
             ) as resp:
+
+                response = await resp.json()
+                print(f"DEBUG: response status: {resp.status}")
+                print(f"DEBUG: response keys: {response.keys()}")
+                print(f"DEBUG: full response: {response}")
+
                 if resp.status == 403:
                     raise RequireMFAException("Multi-Factor Auth Required")
                 elif resp.status != 200:
@@ -2866,7 +2878,6 @@ class MonarchMoney(object):
                         f"HTTP Code {resp.status}: {resp.reason}"
                     )
 
-                response = await resp.json()
                 self.set_token(response["token"])
                 self._headers["Authorization"] = f"Token {self._token}"
 
@@ -2883,6 +2894,12 @@ class MonarchMoney(object):
             "trusted_device": False,
             "username": email,
         }
+
+        print(
+            f"DEBUG: Making login request to URL: {MonarchMoneyEndpoints.getLoginEndpoint()}"
+        )
+        print(f"DEBUG: Login payload headers: {self._headers}")
+        print(f"DEBUG: Login payload json: {data}")
 
         async with ClientSession(headers=self._headers) as session:
             async with session.post(
