@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional, Union
 import oathtool
 from aiohttp import ClientSession, FormData
 from aiohttp.client import DEFAULT_TIMEOUT
-from gql import Client, gql
+from gql import Client, gql, GraphQLRequest
 from gql.transport.aiohttp import AIOHTTPTransport
 from graphql import DocumentNode
 
@@ -2795,9 +2795,14 @@ class MonarchMoney(object):
         """
         Makes a GraphQL call to Monarch Money's API.
         """
-        return await self._get_graphql_client().execute_async(
-            request=graphql_query, variable_values=variables, operation_name=operation
+        client = self._get_graphql_client()
+
+        request = GraphQLRequest(
+            request=graphql_query, variable_values=variables, operation_name=operation,
         )
+
+        async with client as session:
+            return await session.execute(request=request)
 
     def save_session(self, filename: Optional[str] = None) -> None:
         """
