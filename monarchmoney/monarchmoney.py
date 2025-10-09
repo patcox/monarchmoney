@@ -99,8 +99,8 @@ class MonarchMoney(object):
             await self.multi_factor_authenticate(
                 email, passwd, input("Two Factor Code: ")
             )
-            if save_session:
-                self.save_session(self._session_file)
+        if save_session:
+            self.save_session(self._session_file)
 
     async def login(
         self,
@@ -129,6 +129,8 @@ class MonarchMoney(object):
     ) -> None:
         """Performs multi-factor authentication to access a Monarch Money account."""
         await self._multi_factor_authenticate(email, password, code)
+        if save_session:
+            self.save_session(self._session_file)
 
     async def get_accounts(self) -> Dict[str, Any]:
         """
