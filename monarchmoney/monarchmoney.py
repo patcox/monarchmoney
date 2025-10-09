@@ -2797,10 +2797,12 @@ class MonarchMoney(object):
         """
         client = self._get_graphql_client()
 
+        print("DEBUG: creating GraphQLRequest")
         request = GraphQLRequest(
             request=graphql_query, variable_values=variables, operation_name=operation,
         )
 
+        print("DEBUG: sending GraphQLRequest")
         async with client as session:
             return await session.execute(request=request)
 
