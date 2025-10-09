@@ -5,6 +5,7 @@ import json
 import os
 import pickle
 import time
+import uuid
 from datetime import datetime, date, timedelta
 from typing import Any, Dict, List, Optional, Union
 
@@ -58,11 +59,14 @@ class MonarchMoney(object):
         timeout: int = 10,
         token: Optional[str] = None,
     ) -> None:
+        device_uuid = str(uuid.uuid4())
+
         self._headers = {
             "Accept": "application/json",
             "Client-Platform": "web",
             "Content-Type": "application/json",
             "User-Agent": "MonarchMoneyAPI (https://github.com/hammem/monarchmoney)",
+            "Device-UUID": device_uuid,
         }
         if token:
             self._headers["Authorization"] = f"Token {token}"
@@ -2843,13 +2847,13 @@ class MonarchMoney(object):
         """
         data = {
             "password": password,
-            "supports_mfa": True,
-            "trusted_device": False,
+            "trusted_device": True,
             "username": email,
         }
 
         if mfa_secret_key:
-            data["totp"] = oathtool.generate_otp(mfa_secret_key)
+            data["supports_mfa"] = True
+            data["totp"] = mfa_secret_key
 
         async with ClientSession(headers=self._headers) as session:
             async with session.post(
