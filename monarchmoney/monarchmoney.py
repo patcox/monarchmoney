@@ -2,6 +2,7 @@ import asyncio
 import calendar
 import getpass
 import json
+import logging
 import os
 import pickle
 import time
@@ -15,6 +16,10 @@ from aiohttp.client import DEFAULT_TIMEOUT
 from gql import Client, gql
 from gql.transport.aiohttp import AIOHTTPTransport
 from graphql import DocumentNode
+
+LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+logging.basicConfig(level=logging.WARNING, format=LOG_FORMAT)
+LOGGER = logging.getLogger(__name__)
 
 AUTH_HEADER_KEY = "authorization"
 CSRF_KEY = "csrftoken"
@@ -116,7 +121,7 @@ class MonarchMoney(object):
     ) -> None:
         """Logs into a Monarch Money account."""
         if use_saved_session and os.path.exists(self._session_file):
-            print(f"Using saved session found at {self._session_file}")
+            LOGGER.warning(f"Using saved session found at {self._session_file}")
             self.load_session(self._session_file)
             return
 
@@ -2855,11 +2860,9 @@ class MonarchMoney(object):
             data["supports_mfa"] = True
             data["totp"] = mfa_secret_key
 
-        print(
-            f"DEBUG: Making login request to URL: {MonarchMoneyEndpoints.getLoginEndpoint()}"
-        )
-        print(f"DEBUG: Login payload headers: {self._headers}")
-        print(f"DEBUG: Login payload json: {data}")
+        LOGGER.warning(f"Making login request to URL: {MonarchMoneyEndpoints.getLoginEndpoint()}")
+        LOGGER.warning(f"DEBUG: Login payload headers: {self._headers}")
+        LOGGER.warning(f"DEBUG: Login payload json: {data}")
 
         async with ClientSession(headers=self._headers) as session:
             async with session.post(
@@ -2867,9 +2870,9 @@ class MonarchMoney(object):
             ) as resp:
 
                 response = await resp.json()
-                print(f"DEBUG: response status: {resp.status}")
-                print(f"DEBUG: response keys: {response.keys()}")
-                print(f"DEBUG: full response: {response}")
+                LOGGER.warning(f"DEBUG: response status: {resp.status}")
+                LOGGER.warning(f"DEBUG: response keys: {response.keys()}")
+                LOGGER.warning(f"DEBUG: full response: {response}")
 
                 if resp.status == 403:
                     raise RequireMFAException("Multi-Factor Auth Required")
@@ -2895,11 +2898,11 @@ class MonarchMoney(object):
             "username": email,
         }
 
-        print(
+        LOGGER.warning(
             f"DEBUG: Making login request to URL: {MonarchMoneyEndpoints.getLoginEndpoint()}"
         )
-        print(f"DEBUG: Login payload headers: {self._headers}")
-        print(f"DEBUG: Login payload json: {data}")
+        LOGGER.warning(f"DEBUG: MFA Login payload headers: {self._headers}")
+        LOGGER.warning(f"DEBUG: MFA Login payload json: {data}")
 
         async with ClientSession(headers=self._headers) as session:
             async with session.post(
